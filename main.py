@@ -94,7 +94,7 @@ def sendEmail(strAmount):
     word = 'строка'
     if str(strAmount)[-1] == '0' or 4 < strAmount < 20:
         word = 'строк'
-    elif strAmount != 1:
+    elif str(strAmount)[-1] != 1 and 1 < strAmount%10 < 5:
         word = 'строки'
 
     body = str(strAmount) + ' ' + word
