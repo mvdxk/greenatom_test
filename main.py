@@ -2,6 +2,13 @@ import requests
 from bs4 import BeautifulSoup
 import openpyxl as xl
 from openpyxl.styles import Alignment
+import smtplib
+from email.mime.multipart import MIMEMultipart
+from email.mime.text import MIMEText
+from email.mime.base import MIMEBase
+import os
+import mimetypes
+from email import encoders
 
 moex_url = 'https://www.moex.com/ru/derivatives/currency-rate.aspx?currency='
 currs = {
@@ -74,6 +81,46 @@ def createFile(data):
         sheet.column_dimensions[l].width = 46
     file.save('data.xlsx')
 
+def sendEmail(strAmount):
+    addr_from = "test.greenatom@mail.ru"
+    addr_to = "test.greenatom@mail.ru"
+    password = "BZCi8XdGKj4YVqDFFiad"
+
+    msg = MIMEMultipart()
+    msg['From'] = addr_from
+    msg['To'] = addr_to
+    msg['Subject'] = '-'
+
+    word = 'строка'
+    if str(strAmount)[-1] == '0' or 4 < strAmount < 20:
+        word = 'строк'
+    elif strAmount != 1:
+        word = 'строки'
+
+    body = str(strAmount) + ' ' + word
+    msg.attach(MIMEText(body, 'plain'))
+
+    filepath = 'C:\\Users\\Sas\\Documents\\GitHub\\greenatom_test\\data.xlsx'
+    filename = os.path.basename(filepath)
+    ctype, encoding = mimetypes.guess_type(filepath)
+    maintype, subtype = ctype.split('/', 1)
+    if os.path.isfile(filepath):
+        with open(filepath, 'rb') as fp:
+            file = MIMEBase(maintype, subtype)
+            file.set_payload(fp.read())
+            fp.close()
+        encoders.encode_base64(file)
+    file.add_header('Content-Disposition', 'attachment', filename=filename)
+    msg.attach(file)
+
+    server = smtplib.SMTP_SSL('smtp.mail.ru', 465)
+    server.login(addr_from, password)
+    server.send_message(msg)
+    server.quit()
+
+
+
+
 res['usd'] = BeautifulSoup(requests.get(moex_url + currs['usd']).text, 'lxml')
 res['eur'] = BeautifulSoup(requests.get(moex_url + currs['eur']).text, 'lxml')
 res['usd'] = res['usd'].find('table', class_='tablels').find_all('tr')[2:]
@@ -82,3 +129,4 @@ usd = makeDict(res['usd'])
 eur = makeDict(res['eur'])
 data = join(usd, eur)
 createFile(data)
+sendEmail(len(data)+1)
