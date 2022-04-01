@@ -100,7 +100,7 @@ def sendEmail(strAmount):
     body = str(strAmount) + ' ' + word
     msg.attach(MIMEText(body, 'plain'))
 
-    filepath = 'C:\\Users\\Sas\\Documents\\GitHub\\greenatom_test\\data.xlsx'
+    filepath = 'data.xlsx'
     filename = os.path.basename(filepath)
     ctype, encoding = mimetypes.guess_type(filepath)
     maintype, subtype = ctype.split('/', 1)
